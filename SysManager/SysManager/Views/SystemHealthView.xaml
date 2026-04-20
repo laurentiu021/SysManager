@@ -1,0 +1,207 @@
+<UserControl x:Class="SysManager.Views.SystemHealthView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:SysManager.Views">
+    <UserControl.Resources>
+        <LinearGradientBrush x:Key="PageBg" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#070A0F" Offset="0"/>
+            <GradientStop Color="#0B1220" Offset="0.5"/>
+            <GradientStop Color="#090D16" Offset="1"/>
+        </LinearGradientBrush>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource PageBg}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="28,24,28,28">
+
+                <!-- Header -->
+                <DockPanel>
+                    <StackPanel>
+                        <TextBlock Text="System health" Style="{StaticResource Display}"/>
+                        <TextBlock Text="OS, CPU, RAM and disk diagnostics with SMART data and memory error detection."
+                                   Style="{StaticResource Subtle}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <Button Content="Rescan" Command="{Binding ScanCommand}" Style="{StaticResource PrimaryButton}"
+                            HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                </DockPanel>
+
+                <!-- Summary card -->
+                <Border Style="{StaticResource Card}" Margin="0,20,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Overview" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock Text="{Binding Summary}" Style="{StaticResource Subtle}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Memory modules -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Memory modules" Style="{StaticResource SectionTitle}"/>
+                        <DataGrid ItemsSource="{Binding Modules}"
+                                  AutoGenerateColumns="False" HeadersVisibility="Column"
+                                  GridLinesVisibility="None" IsReadOnly="True"
+                                  Background="Transparent" RowBackground="Transparent"
+                                  AlternatingRowBackground="#0F141C" BorderThickness="0"
+                                  Margin="0,10,0,0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Slot" Binding="{Binding BankLabel}" Width="*"/>
+                                <DataGridTextColumn Header="Manufacturer" Binding="{Binding Manufacturer}" Width="*"/>
+                                <DataGridTextColumn Header="Capacity (GB)" Binding="{Binding CapacityGB, StringFormat={}{0:F1}}" Width="110"/>
+                                <DataGridTextColumn Header="Speed (MHz)" Binding="{Binding SpeedMHz}" Width="110"/>
+                                <DataGridTextColumn Header="Part #" Binding="{Binding PartNumber}" Width="1.5*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Memory health check -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0"
+                        BorderBrush="{Binding MemoryHealthColorHex, Converter={StaticResource HexBrush}}"
+                        BorderThickness="1">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Memory health" Style="{StaticResource SectionTitle}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Ellipse Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,10,0"
+                                         Fill="{Binding MemoryHealthColorHex, Converter={StaticResource HexBrush}}"/>
+                                <TextBlock Text="{Binding MemoryHealthVerdict}"
+                                           Foreground="{Binding MemoryHealthColorHex, Converter={StaticResource HexBrush}}"
+                                           FontWeight="SemiBold" TextWrapping="Wrap" MaxWidth="620" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <TextBlock Text="Scans the last 30 days of the System event log for hardware errors (WHEA) and Windows Memory Diagnostic results."
+                                       Style="{StaticResource Subtle}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Check memory errors" Command="{Binding CheckMemoryErrorsCommand}"
+                                    Style="{StaticResource PrimaryButton}" Padding="14,8" Margin="0,0,8,0"/>
+                            <Button Content="Run MemTest (reboot)" Command="{Binding ScheduleMemoryTestCommand}"
+                                    Style="{StaticResource SecondaryButton}" Padding="14,8" Margin="0,0,8,0"/>
+                            <Button Content="MemTest86 ↗" Command="{Binding OpenMemTest86Command}"
+                                    Style="{StaticResource GhostButton}" Padding="14,8"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Storage devices list -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Storage devices" Style="{StaticResource SectionTitle}"/>
+                        <DataGrid ItemsSource="{Binding Disks}"
+                                  AutoGenerateColumns="False" HeadersVisibility="Column"
+                                  GridLinesVisibility="None" IsReadOnly="True"
+                                  Background="Transparent" RowBackground="Transparent"
+                                  AlternatingRowBackground="#0F141C" BorderThickness="0"
+                                  Margin="0,10,0,0">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Drive" Binding="{Binding FriendlyName}" Width="*"/>
+                                <DataGridTextColumn Header="Media" Binding="{Binding MediaType}" Width="70"/>
+                                <DataGridTextColumn Header="Bus" Binding="{Binding BusType}" Width="70"/>
+                                <DataGridTextColumn Header="Size (GB)" Binding="{Binding SizeGB, StringFormat={}{0:F0}}" Width="90"/>
+                                <DataGridTextColumn Header="Windows Health" Binding="{Binding HealthStatus}" Width="130"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Disk health / SMART -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="Disk health (SMART)" Style="{StaticResource SectionTitle}"/>
+                            <Button Content="Run SMART check" Command="{Binding CheckDiskHealthCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <TextBlock Text="Temperature, wear level, power-on hours and read/write errors pulled from Storage Reliability Counters."
+                                   Style="{StaticResource Subtle}" Margin="0,4,0,10" TextWrapping="Wrap"/>
+
+                        <ItemsControl ItemsSource="{Binding DiskHealth}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource CardInner}" Margin="0,0,0,10"
+                                            BorderBrush="{Binding VerdictColorHex, Converter={StaticResource HexBrush}}"
+                                            BorderThickness="1">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="12" Height="12" VerticalAlignment="Center" Margin="0,0,10,0"
+                                                         Fill="{Binding VerdictColorHex, Converter={StaticResource HexBrush}}"/>
+                                                <TextBlock Text="{Binding FriendlyName}" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center"/>
+                                                <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding MediaType}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding BusType}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding SizeGB, StringFormat={}{0:F0} GB}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Verdict}"
+                                                       Foreground="{Binding VerdictColorHex, Converter={StaticResource HexBrush}}"
+                                                       FontWeight="SemiBold" Margin="22,8,0,0" TextWrapping="Wrap"/>
+                                            <WrapPanel Orientation="Horizontal" Margin="22,10,0,0">
+                                                <StackPanel Margin="0,0,24,0">
+                                                    <TextBlock Text="TEMPERATURE" Style="{StaticResource Caption}"/>
+                                                    <TextBlock Text="{Binding TemperatureC, StringFormat={}{0:F0} °C, FallbackValue=—}" FontSize="14" Foreground="{StaticResource TextPrimary}"/>
+                                                </StackPanel>
+                                                <StackPanel Margin="0,0,24,0">
+                                                    <TextBlock Text="WEAR" Style="{StaticResource Caption}"/>
+                                                    <TextBlock Text="{Binding WearPercent, StringFormat={}{0}%, FallbackValue=—}" FontSize="14" Foreground="{StaticResource TextPrimary}"/>
+                                                </StackPanel>
+                                                <StackPanel Margin="0,0,24,0">
+                                                    <TextBlock Text="POWER-ON" Style="{StaticResource Caption}"/>
+                                                    <TextBlock Text="{Binding PowerOnHours, StringFormat={}{0} h, FallbackValue=—}" FontSize="14" Foreground="{StaticResource TextPrimary}"/>
+                                                </StackPanel>
+                                                <StackPanel Margin="0,0,24,0">
+                                                    <TextBlock Text="READ ERRORS" Style="{StaticResource Caption}"/>
+                                                    <TextBlock Text="{Binding ReadErrors, FallbackValue=—}" FontSize="14" Foreground="{StaticResource TextPrimary}"/>
+                                                </StackPanel>
+                                                <StackPanel>
+                                                    <TextBlock Text="WRITE ERRORS" Style="{StaticResource Caption}"/>
+                                                    <TextBlock Text="{Binding WriteErrors, FallbackValue=—}" FontSize="14" Foreground="{StaticResource TextPrimary}"/>
+                                                </StackPanel>
+                                            </WrapPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- chkdsk -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="File-system scan" Style="{StaticResource SectionTitle}"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                                <Button Content="chkdsk C: (read-only)" Command="{Binding RunChkdskCommand}" CommandParameter="C:"
+                                        Style="{StaticResource PrimaryButton}"/>
+                                <Button Content="D:" Command="{Binding RunChkdskCommand}" CommandParameter="D:"
+                                        Style="{StaticResource SecondaryButton}" Margin="6,0,0,0"/>
+                                <Button Content="Cancel" Command="{Binding CancelScanCommand}"
+                                        Style="{StaticResource GhostButton}" Margin="6,0,0,0"/>
+                            </StackPanel>
+                        </DockPanel>
+                        <TextBlock Text="Read-only scan — non-destructive, safe to run any time. Reports problems without fixing them."
+                                   Style="{StaticResource Subtle}" Margin="0,4,0,10" TextWrapping="Wrap"/>
+                        <v:ConsoleView DataContext="{Binding Console}" Height="200"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Footer status -->
+                <Grid Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Style="{StaticResource Subtle}"/>
+                    <ProgressBar Grid.Column="1" Width="180" Height="4"
+                                 IsIndeterminate="{Binding IsProgressIndeterminate}"
+                                 Visibility="{Binding IsBusy, Converter={StaticResource FlexVis}}"/>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

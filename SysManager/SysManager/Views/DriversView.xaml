@@ -1,0 +1,25 @@
+<UserControl x:Class="SysManager.Views.DriversView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:SysManager.Views">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Drivers" FontSize="22" FontWeight="SemiBold"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,12,0,12">
+            <Button Content="List installed drivers" Command="{Binding ListDriversCommand}" Padding="12,6"/>
+            <Button Content="Check driver updates (Windows Update)" Command="{Binding CheckWindowsUpdateDriversCommand}" Padding="12,6" Margin="8,0,0,0"/>
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Padding="12,6" Margin="8,0,0,0"/>
+        </StackPanel>
+
+        <v:ConsoleView Grid.Row="2" DataContext="{Binding Console}"/>
+
+        <TextBlock Grid.Row="3" Margin="0,10,0,0" Text="{Binding StatusMessage}" Foreground="#9AA0A6"/>
+    </Grid>
+</UserControl>

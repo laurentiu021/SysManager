@@ -1,0 +1,82 @@
+<UserControl x:Class="SysManager.Views.CleanupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:SysManager.Views">
+    <UserControl.Resources>
+        <LinearGradientBrush x:Key="PageBg" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#070A0F" Offset="0"/>
+            <GradientStop Color="#0B1220" Offset="0.5"/>
+            <GradientStop Color="#090D16" Offset="1"/>
+        </LinearGradientBrush>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource PageBg}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="28,24,28,0">
+            <TextBlock Text="Cleanup" Style="{StaticResource Display}"/>
+            <TextBlock Text="Clear temp files, empty Recycle Bin, or run SFC and DISM to repair Windows."
+                       Style="{StaticResource Subtle}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Admin banner — SFC/DISM need it -->
+        <Border Grid.Row="1" Margin="28,16,28,0" Padding="16,14" CornerRadius="10"
+                Background="#2A1E14" BorderBrush="#F59E0B" BorderThickness="1"
+                Visibility="{Binding IsElevated, Converter={StaticResource FlexVis}, ConverterParameter=Inverse}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE7EF;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                   FontSize="18" Foreground="#F59E0B" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="SFC and DISM need administrator rights"
+                                   FontSize="15" FontWeight="SemiBold" Foreground="#F59E0B" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Temp cleanup and Recycle Bin work without admin. SFC /scannow and DISM /RestoreHealth can only be launched elevated."
+                               Foreground="{StaticResource TextSecondary}" Margin="28,6,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Run as Administrator"
+                        Command="{Binding RelaunchAsAdminCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="18,10" FontSize="14" VerticalAlignment="Center" Margin="16,0,0,0"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="28,16,28,0">
+            <StackPanel>
+                <TextBlock Text="Actions" Style="{StaticResource SectionTitle}" Margin="0,0,0,10"/>
+                <WrapPanel Orientation="Horizontal">
+                    <Button Content="Clean TEMP" Command="{Binding CleanTempCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,8"/>
+                    <Button Content="Empty Recycle Bin" Command="{Binding EmptyRecycleBinCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8"/>
+                    <Button Content="SFC /scannow" Command="{Binding RunSfcCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8"/>
+                    <Button Content="DISM RestoreHealth" Command="{Binding RunDismCommand}" Style="{StaticResource SecondaryButton}" Margin="0,0,8,8"/>
+                    <Button Content="Cancel" Command="{Binding CancelCommand}" Style="{StaticResource GhostButton}" Margin="0,0,8,8"/>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource Card}" Margin="28,16,28,0" Padding="0">
+            <v:ConsoleView DataContext="{Binding Console}"/>
+        </Border>
+
+        <Grid Grid.Row="4" Margin="28,12,28,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar Grid.Column="0" Height="6" Minimum="0" Maximum="100"
+                         Value="{Binding Progress}"
+                         IsIndeterminate="{Binding IsProgressIndeterminate}"/>
+            <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusMessage}" Style="{StaticResource Subtle}"/>
+        </Grid>
+    </Grid>
+</UserControl>

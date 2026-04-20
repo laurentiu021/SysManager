@@ -1,0 +1,97 @@
+<UserControl x:Class="SysManager.Views.AppUpdatesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:SysManager.Views">
+    <UserControl.Resources>
+        <LinearGradientBrush x:Key="PageBg" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#070A0F" Offset="0"/>
+            <GradientStop Color="#0B1220" Offset="0.5"/>
+            <GradientStop Color="#090D16" Offset="1"/>
+        </LinearGradientBrush>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource PageBg}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="180"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="28,24,28,0">
+            <TextBlock Text="App updates" Style="{StaticResource Display}"/>
+            <TextBlock Text="Scan for winget upgrades and install them in bulk."
+                       Style="{StaticResource Subtle}" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Admin banner — system-wide package installs need elevation -->
+        <Border Grid.Row="1" Margin="28,16,28,0" Padding="16,14" CornerRadius="10"
+                Background="#2A1E14" BorderBrush="#F59E0B" BorderThickness="1"
+                Visibility="{Binding IsElevated, Converter={StaticResource FlexVis}, ConverterParameter=Inverse}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE7EF;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                   FontSize="18" Foreground="#F59E0B" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="Some upgrades need administrator rights"
+                                   FontSize="15" FontWeight="SemiBold" Foreground="#F59E0B" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="Scanning works without admin. System-wide packages (installed for all users) can only be upgraded when elevated — per-user packages work either way."
+                               Foreground="{StaticResource TextSecondary}" Margin="28,6,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+                <Button Grid.Column="1" Content="Run as Administrator"
+                        Command="{Binding RelaunchAsAdminCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Padding="18,10" FontSize="14" VerticalAlignment="Center" Margin="16,0,0,0"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="28,16,28,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Scan for updates" Command="{Binding ScanCommand}" Style="{StaticResource PrimaryButton}"/>
+                <Button Content="Upgrade selected" Command="{Binding UpgradeSelectedCommand}" Style="{StaticResource SecondaryButton}" Margin="8,0,0,0"/>
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Style="{StaticResource GhostButton}" Margin="6,0,0,0"/>
+                <CheckBox Content="Select all" IsChecked="{Binding SelectAll}" Margin="16,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource Card}" Margin="28,16,28,0" Padding="0">
+            <DataGrid ItemsSource="{Binding Packages}"
+                      AutoGenerateColumns="False" HeadersVisibility="Column"
+                      GridLinesVisibility="None" CanUserAddRows="False"
+                      Background="Transparent" RowBackground="Transparent"
+                      AlternatingRowBackground="#0F141C" BorderThickness="0">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Header="" Width="40" Binding="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"/>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="2*"/>
+                    <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="2*"/>
+                    <DataGridTextColumn Header="Current" Binding="{Binding CurrentVersion}" Width="*"/>
+                    <DataGridTextColumn Header="Available" Binding="{Binding AvailableVersion}" Width="*"/>
+                    <DataGridTextColumn Header="Source" Binding="{Binding Source}" Width="80"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Border Grid.Row="4" Style="{StaticResource Card}" Margin="28,16,28,0" Padding="0">
+            <v:ConsoleView DataContext="{Binding Console}"/>
+        </Border>
+
+        <Grid Grid.Row="5" Margin="28,12,28,24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <ProgressBar Grid.Column="0" Height="6" Minimum="0" Maximum="100"
+                         Value="{Binding Progress}"
+                         IsIndeterminate="{Binding IsProgressIndeterminate}"/>
+            <TextBlock Grid.Column="1" Margin="12,0,0,0" Text="{Binding StatusMessage}" Style="{StaticResource Subtle}"/>
+        </Grid>
+    </Grid>
+</UserControl>

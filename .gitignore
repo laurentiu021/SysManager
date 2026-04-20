@@ -1,0 +1,66 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Pp]ublish/
+publish/
+*.user
+*.suo
+*.cache
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.userprefs
+*.pidb
+*.booproj
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!packages/build/
+
+# Test results
+TestResults/
+[Tt]est[Rr]esult*/
+coverage*.xml
+coverage*.json
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+logs/
+
+# Windows / OS cruft
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.stackdump
+
+# Archives in the source tree
+*.7z
+*.zip
+
+# MSIX / ClickOnce / installers
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+
+# Rider / ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# JetBrains
+.idea/
+
+# VS Code (keep workspace settings, ignore per-user)
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
