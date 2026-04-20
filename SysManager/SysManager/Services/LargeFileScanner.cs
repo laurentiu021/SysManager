@@ -14,6 +14,9 @@ namespace SysManager.Services;
 /// </summary>
 public sealed class LargeFileScanner
 {
+    /// <summary>Progress payload: files scanned, bytes scanned, current folder.</summary>
+    public sealed record LargeFileProgress(long FilesScanned, long BytesScanned, string CurrentFolder);
+
     // Skip well-known system subtrees where poking around is slow and pointless.
     private static readonly string[] SkipSegments =
     {
@@ -26,7 +29,7 @@ public sealed class LargeFileScanner
         string rootPath,
         long minSizeBytes,
         int top = 100,
-        IProgress<string>? progress = null,
+        IProgress<LargeFileProgress>? progress = null,
         CancellationToken ct = default)
         => Task.Run(() => Scan(rootPath, minSizeBytes, top, progress, ct), ct);
 
@@ -34,14 +37,12 @@ public sealed class LargeFileScanner
         string rootPath,
         long minSizeBytes,
         int top,
-        IProgress<string>? progress,
+        IProgress<LargeFileProgress>? progress,
         CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(rootPath) || !Directory.Exists(rootPath))
             return Array.Empty<LargeFileEntry>();
 
-        // Min-heap by size — only keep the top N largest seen so far.
-        // Using a sorted list keyed by size + path for uniqueness.
         var heap = new SortedSet<(long Size, string Path)>(Comparer<(long, string)>.Create(
             (a, b) =>
             {
@@ -52,7 +53,9 @@ public sealed class LargeFileScanner
 
         var stack = new Stack<string>();
         stack.Push(rootPath);
-        var scanned = 0;
+        long scanned = 0;
+        long bytesScanned = 0;
+        var lastReport = Environment.TickCount64;
 
         while (stack.Count > 0 && !ct.IsCancellationRequested)
         {
@@ -68,11 +71,12 @@ public sealed class LargeFileScanner
             {
                 if (ct.IsCancellationRequested) break;
                 scanned++;
-                if ((scanned & 0x3FF) == 0) progress?.Report($"Scanned {scanned:N0} files...");
 
                 try
                 {
                     var fi = new FileInfo(f);
+                    bytesScanned += fi.Length;
+
                     if (fi.Length < minSizeBytes) continue;
 
                     if (heap.Count < top)
@@ -80,9 +84,7 @@ public sealed class LargeFileScanner
                         heap.Add((fi.Length, f));
                         meta[f] = new LargeFileEntry
                         {
-                            Path = f,
-                            Name = fi.Name,
-                            SizeBytes = fi.Length,
+                            Path = f, Name = fi.Name, SizeBytes = fi.Length,
                             LastModified = fi.LastWriteTime
                         };
                     }
@@ -96,21 +98,27 @@ public sealed class LargeFileScanner
                             heap.Add((fi.Length, f));
                             meta[f] = new LargeFileEntry
                             {
-                                Path = f,
-                                Name = fi.Name,
-                                SizeBytes = fi.Length,
+                                Path = f, Name = fi.Name, SizeBytes = fi.Length,
                                 LastModified = fi.LastWriteTime
                             };
                         }
                     }
                 }
-                catch { /* unreachable / locked — skip */ }
+                catch { }
+            }
+
+            // Throttle progress to every ~200 ms so the UI doesn't drown in events.
+            var now = Environment.TickCount64;
+            if (now - lastReport >= 200)
+            {
+                progress?.Report(new LargeFileProgress(scanned, bytesScanned, cur));
+                lastReport = now;
             }
 
             foreach (var d in dirs) stack.Push(d);
         }
 
-        // Return top → bottom.
+        progress?.Report(new LargeFileProgress(scanned, bytesScanned, "Done"));
         return heap.Reverse().Select(h => meta[h.Path]).ToList();
     }
 

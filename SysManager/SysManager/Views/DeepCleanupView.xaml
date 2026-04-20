@@ -54,6 +54,19 @@
                         </DockPanel>
                         <TextBlock Text="{Binding ScanSummary}" Style="{StaticResource Subtle}" Margin="0,0,0,10" TextWrapping="Wrap"/>
 
+                        <!-- Scan progress — determinate, category-by-category -->
+                        <StackPanel Margin="0,0,0,10" Visibility="{Binding IsScanning, Converter={StaticResource FlexVis}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding ScanStatusLine}" Foreground="{StaticResource Accent}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding ScanProgress, StringFormat={}{0}%}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            </Grid>
+                            <ProgressBar Height="6" Minimum="0" Maximum="100" Value="{Binding ScanProgress}" Margin="0,6,0,0"/>
+                        </StackPanel>
+
                         <ItemsControl ItemsSource="{Binding Categories}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -109,6 +122,19 @@
 
                         <TextBlock Text="{Binding CleanSummary}" Style="{StaticResource Subtle}" Margin="0,8,0,0" TextWrapping="Wrap"
                                    Visibility="{Binding CleanSummary, Converter={StaticResource FlexVis}}"/>
+
+                        <!-- Clean progress — determinate, category-by-category -->
+                        <StackPanel Margin="0,8,0,0" Visibility="{Binding IsCleaning, Converter={StaticResource FlexVis}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding CleanStatusLine}" Foreground="#22C55E" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="{Binding CleanProgress, StringFormat={}{0}%}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                            </Grid>
+                            <ProgressBar Height="6" Minimum="0" Maximum="100" Value="{Binding CleanProgress}" Margin="0,6,0,0"/>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
 
@@ -144,6 +170,24 @@
 
                         <TextBlock Text="{Binding LargeScanStatus}" Style="{StaticResource Subtle}" Margin="0,0,0,8"
                                    Visibility="{Binding LargeScanStatus, Converter={StaticResource FlexVis}}"/>
+
+                        <!-- Large-files scan progress — indeterminate bar + live counters -->
+                        <StackPanel Margin="0,0,0,10" Visibility="{Binding IsLargeScanning, Converter={StaticResource FlexVis}}">
+                            <ProgressBar Height="6" IsIndeterminate="True"/>
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding LargeFilesScanned, StringFormat={}{0:N0} files}" Foreground="{StaticResource TextPrimary}" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="{Binding LargeBytesScannedDisplay, StringFormat=scanned {0}}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                <Button Grid.Column="3" Content="Cancel" Command="{Binding CancelCommand}" Style="{StaticResource GhostButton}" Padding="10,4"/>
+                            </Grid>
+                            <TextBlock Text="{Binding LargeCurrentFolder}" Foreground="{StaticResource TextMuted}" FontSize="11" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
 
                         <DataGrid ItemsSource="{Binding LargeFiles}"
                                   AutoGenerateColumns="False" HeadersVisibility="Column"

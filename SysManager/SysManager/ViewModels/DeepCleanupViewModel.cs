@@ -17,7 +17,9 @@ public partial class DeepCleanupViewModel : ViewModelBase
     private readonly DeepCleanupService _cleanup = new();
     private readonly LargeFileScanner _largeFiles = new();
     private readonly FixedDriveService _drives = new();
-    private CancellationTokenSource? _cts;
+    private CancellationTokenSource? _scanCts;
+    private CancellationTokenSource? _cleanCts;
+    private CancellationTokenSource? _largeCts;
 
     public ObservableCollection<CleanupCategory> Categories { get; } = new();
     public ObservableCollection<LargeFileEntry> LargeFiles { get; } = new();
@@ -26,6 +28,17 @@ public partial class DeepCleanupViewModel : ViewModelBase
     [ObservableProperty] private bool _isScanning;
     [ObservableProperty] private bool _isCleaning;
     [ObservableProperty] private bool _isLargeScanning;
+
+    // Scan progress (determinate, category-based)
+    [ObservableProperty] private int _scanProgress;          // 0..100
+    [ObservableProperty] private string _scanStatusLine = string.Empty;
+    [ObservableProperty] private int _cleanProgress;         // 0..100
+    [ObservableProperty] private string _cleanStatusLine = string.Empty;
+
+    // Large files progress (indeterminate, counter-based)
+    [ObservableProperty] private long _largeFilesScanned;
+    [ObservableProperty] private long _largeBytesScanned;
+    [ObservableProperty] private string _largeCurrentFolder = string.Empty;
 
     [ObservableProperty] private string _scanSummary = "Press 'Scan' to discover what can be safely freed.";
     [ObservableProperty] private string _cleanSummary = string.Empty;
@@ -36,6 +49,8 @@ public partial class DeepCleanupViewModel : ViewModelBase
 
     public long TotalSelectedBytes => Categories.Where(c => c.IsSelected).Sum(c => c.TotalSizeBytes);
     public string TotalSelectedDisplay => CleanupCategory.HumanSize(TotalSelectedBytes);
+
+    public string LargeBytesScannedDisplay => CleanupCategory.HumanSize(LargeBytesScanned);
 
     public DeepCleanupViewModel()
     {
@@ -48,8 +63,6 @@ public partial class DeepCleanupViewModel : ViewModelBase
         {
             ScanLocations.Clear();
 
-            // Preset user folders first — the most common "where did my space go"
-            // spots that don't include any system files.
             AddLocation("📥  Downloads", Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + @"\Downloads");
             AddLocation("📄  Documents", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
             AddLocation("🖥️  Desktop",   Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
@@ -62,7 +75,6 @@ public partial class DeepCleanupViewModel : ViewModelBase
             AddLocation("💼  Program Files",      pf);
             AddLocation("💼  Program Files (x86)", pfx86);
 
-            // Then all fixed drives (whole drive scan).
             var drives = await _drives.EnumerateAsync();
             foreach (var d in drives)
                 AddLocation($"💾  Whole drive  {d.Letter}  ({d.SizeGB:F0} GB)", d.Letter + @"\");
@@ -78,16 +90,27 @@ public partial class DeepCleanupViewModel : ViewModelBase
         ScanLocations.Add(new ScanLocation(label, path));
     }
 
+    partial void OnLargeBytesScannedChanged(long value) => OnPropertyChanged(nameof(LargeBytesScannedDisplay));
+
+    // ---------- deep cleanup scan ----------
+
     [RelayCommand]
     private async Task ScanAsync()
     {
         if (IsScanning) return;
         IsScanning = true;
+        ScanProgress = 0;
+        ScanStatusLine = "Starting...";
         ScanSummary = "Scanning safe cleanup locations...";
-        _cts = new CancellationTokenSource();
+        _scanCts = new CancellationTokenSource();
         try
         {
-            var cats = await _cleanup.ScanAsync(_cts.Token);
+            var progress = new Progress<DeepCleanupService.ScanProgress>(p =>
+            {
+                ScanProgress = p.Total > 0 ? (int)(p.Current * 100 / p.Total) : 0;
+                ScanStatusLine = $"[{p.Current}/{p.Total}]  {p.CategoryName}";
+            });
+            var cats = await _cleanup.ScanAsync(progress, _scanCts.Token);
             Categories.Clear();
             foreach (var c in cats)
             {
@@ -103,9 +126,11 @@ public partial class DeepCleanupViewModel : ViewModelBase
             }
             var total = cats.Sum(c => c.TotalSizeBytes);
             ScanSummary = $"Found {CleanupCategory.HumanSize(total)} across {cats.Count} categories. Untick anything you want to keep.";
+            ScanStatusLine = "Scan complete.";
             OnPropertyChanged(nameof(TotalSelectedBytes));
             OnPropertyChanged(nameof(TotalSelectedDisplay));
         }
+        catch (OperationCanceledException) { ScanSummary = "Scan cancelled."; ScanStatusLine = "Cancelled."; }
         catch (Exception ex) { ScanSummary = $"Scan failed: {ex.Message}"; }
         finally { IsScanning = false; }
     }
@@ -115,15 +140,23 @@ public partial class DeepCleanupViewModel : ViewModelBase
     {
         if (IsCleaning || !Categories.Any(c => c.IsSelected)) return;
         IsCleaning = true;
-        CleanSummary = "Cleaning selected categories — in progress...";
-        _cts = new CancellationTokenSource();
+        CleanProgress = 0;
+        CleanStatusLine = "Starting...";
+        CleanSummary = "Cleaning selected categories — you can keep using the app.";
+        _cleanCts = new CancellationTokenSource();
         try
         {
-            var result = await _cleanup.CleanAsync(Categories, _cts.Token);
+            var progress = new Progress<DeepCleanupService.ScanProgress>(p =>
+            {
+                CleanProgress = p.Total > 0 ? (int)(p.Current * 100 / p.Total) : 0;
+                CleanStatusLine = $"[{p.Current}/{p.Total}]  {p.CategoryName}";
+            });
+            var result = await _cleanup.CleanAsync(Categories, progress, _cleanCts.Token);
             CleanSummary = result.Summary;
-            // Re-scan so users see updated sizes.
+            CleanStatusLine = "Clean complete.";
             await ScanAsync();
         }
+        catch (OperationCanceledException) { CleanSummary = "Clean cancelled."; CleanStatusLine = "Cancelled."; }
         catch (Exception ex) { CleanSummary = $"Clean failed: {ex.Message}"; }
         finally { IsCleaning = false; }
     }
@@ -136,7 +169,12 @@ public partial class DeepCleanupViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void Cancel() => _cts?.Cancel();
+    private void Cancel()
+    {
+        _scanCts?.Cancel();
+        _cleanCts?.Cancel();
+        _largeCts?.Cancel();
+    }
 
     // ---------- large files finder ----------
 
@@ -152,22 +190,31 @@ public partial class DeepCleanupViewModel : ViewModelBase
 
         IsLargeScanning = true;
         LargeFiles.Clear();
-        LargeScanStatus = "Scanning — this may take a minute on large folders...";
-        _cts = new CancellationTokenSource();
+        LargeFilesScanned = 0;
+        LargeBytesScanned = 0;
+        LargeCurrentFolder = string.Empty;
+        LargeScanStatus = $"Scanning {SelectedLocation.Label.Trim()}...";
+        _largeCts = new CancellationTokenSource();
         try
         {
-            var progress = new Progress<string>(s => LargeScanStatus = s);
+            var progress = new Progress<LargeFileScanner.LargeFileProgress>(p =>
+            {
+                LargeFilesScanned = p.FilesScanned;
+                LargeBytesScanned = p.BytesScanned;
+                LargeCurrentFolder = p.CurrentFolder;
+            });
             var list = await _largeFiles.ScanAsync(
                 rootPath: SelectedLocation.Path,
                 minSizeBytes: (long)MinSizeMB * 1024L * 1024L,
                 top: TopCount,
                 progress: progress,
-                ct: _cts.Token);
+                ct: _largeCts.Token);
             foreach (var f in list) LargeFiles.Add(f);
             LargeScanStatus = $"Found {list.Count} files ≥ {MinSizeMB} MB in {SelectedLocation.Label.Trim()}.";
         }
+        catch (OperationCanceledException) { LargeScanStatus = "Scan cancelled."; }
         catch (Exception ex) { LargeScanStatus = $"Error: {ex.Message}"; }
-        finally { IsLargeScanning = false; }
+        finally { IsLargeScanning = false; LargeCurrentFolder = string.Empty; }
     }
 
     [RelayCommand]

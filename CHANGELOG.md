@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-04-20
+
+### Added
+- **Progress bars** everywhere the scanner runs:
+  - Deep cleanup scan — determinate bar with "[12/20] Scanning Steam..." status.
+  - Deep cleanup clean — same, as each selected category is emptied.
+  - Large files finder — indeterminate bar with live counter
+    ("4,328 files · 12.3 GB scanned") and current folder.
+- **Background task mini-tray** in the left sidebar (under the Admin
+  badge) — shows live progress for any running scan/clean/large-files
+  operation. Stays visible on every tab, clickable to jump back.
+
+### Changed
+- Scan and clean operations continue running when you navigate away to
+  other tabs. Progress and results are preserved in the view model.
+
 ## [0.5.0] - 2026-04-20
 
 ### Fixed

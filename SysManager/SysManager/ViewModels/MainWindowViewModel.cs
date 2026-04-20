@@ -69,4 +69,11 @@ public partial class MainWindowViewModel : ObservableObject
         var about = NavItems.FirstOrDefault(n => n.Id == "nav-about");
         if (about != null) SelectedNav = about;
     }
+
+    [RelayCommand]
+    private void OpenDeepCleanupTab()
+    {
+        var dc = NavItems.FirstOrDefault(n => n.Id == "nav-deep-cleanup");
+        if (dc != null) SelectedNav = dc;
+    }
 }
