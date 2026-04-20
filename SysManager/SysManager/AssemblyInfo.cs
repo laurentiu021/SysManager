@@ -1,4 +1,14 @@
+// SysManager — Windows system monitoring toolkit
+// Author : laurentiu021
+// Source : https://github.com/laurentiu021/SysManager
+// License: MIT
+
+using System.Reflection;
 using System.Windows;
+
+// Attributes the SDK doesn't generate from the csproj metadata.
+// Title / Description / Product / Company / Copyright come from csproj.
+[assembly: AssemblyTrademark("SysManager by laurentiu021")]
 
 [assembly:ThemeInfo(
     ResourceDictionaryLocation.None,            //where theme specific resource dictionaries are located

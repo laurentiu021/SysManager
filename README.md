@@ -1,8 +1,9 @@
 # SysManager
 
-A modern Windows system monitoring toolkit: live network monitoring, Windows
-updates, disk and memory health, app updates via winget, and a friendly Event
-Log viewer — all in one WPF desktop app.
+A modern Windows system monitoring toolkit: live network monitoring with
+gamer-friendly presets, Windows updates, disk and memory health, gaming
+launcher cache cleanup, app updates via winget, and a friendly Event Log
+viewer — all in one WPF desktop app.
 
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-blue)
 ![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)
@@ -14,10 +15,14 @@ Log viewer — all in one WPF desktop app.
 
 SysManager is a local-first desktop tool for keeping an eye on a Windows PC.
 It rolls network diagnostics, system health, Windows Update, app updates,
-driver inventory, cleanup utilities, and a readable Event Log viewer into a
+driver inventory, safe deep cleanup, and a readable Event Log viewer into a
 single tabbed WPF app.
 
 Everything runs on the machine itself. No cloud, no telemetry, no account.
+
+Built with gamers in mind — live ping overlays for CS2, PUBG and streaming
+endpoints, Steam/Epic/Battle.net/Riot/GOG/EA launcher cache cleanup, and
+an honest "is it my PC, my ISP, or the server?" verdict.
 
 ## Features
 
@@ -25,7 +30,11 @@ Everything runs on the machine itself. No cloud, no telemetry, no account.
 - Live ping across multiple targets overlaid on a single latency chart
 - Auto-verdict that tells you in plain English whether packet loss is local,
   at your ISP, or at the far-end service
-- Presets for common scenarios (Global, CS2 Europe, PUBG Europe, Streaming)
+- **Presets for gamers & streamers**:
+  - Global (Google, Cloudflare, your router)
+  - **CS2 Europe** — Valve Frankfurt, Vienna, Stockholm relays
+  - **PUBG Europe** — Krafton EU matchmaking endpoints
+  - **Streaming** — YouTube and Twitch ingest
 - Auto-traceroute on a configurable interval (30 s – 10 min)
 - Speed tests: HTTP (Cloudflare) and the official Ookla CLI (auto-downloaded)
 - Jitter, loss %, and average ping per target rolled up into health pills
@@ -42,9 +51,11 @@ Everything runs on the machine itself. No cloud, no telemetry, no account.
 - Colour-coded verdict per drive
 - Memory diagnostic that scans the last 30 days of WHEA events for RAM errors
 - Schedule the Windows Memory Diagnostic at next boot, or jump to MemTest86
-- Read-only chkdsk on C: / D:
+- Read-only chkdsk with auto-discovered NTFS/ReFS drives and multi-select
 
 ### Windows Update (via PSWindowsUpdate)
+- Auto-check for the PSWindowsUpdate module on tab open, with a one-click
+  install card if it's missing
 - Check for standard and feature updates
 - Install selected updates, list history, check pending-reboot state
 - Admin banner with a one-click "Run as Administrator" relaunch
@@ -53,10 +64,33 @@ Everything runs on the machine itself. No cloud, no telemetry, no account.
 - Scan for upgradable packages
 - Select all or individual packages, bulk upgrade with per-package status
 
-### Cleanup
+### Cleanup (fast)
 - Clear TEMP folders
 - Empty the Recycle Bin
-- Run `SFC /scannow` and `DISM /RestoreHealth`
+- Run `SFC /scannow` and `DISM /RestoreHealth` in the background — keep
+  using the app while they grind
+
+### Deep cleanup (safe)
+- **Scan-first**: every category is discovered with size + file count
+  before a single byte is deleted. You pick what goes.
+- **System buckets**: NVIDIA / AMD / Intel installer leftovers, Windows
+  Update cache, Delivery Optimization cache, Windows Installer patch
+  cache, TEMP, Prefetch, crash dumps, old CBS logs, DirectX shader cache,
+  Recycle Bin on every drive.
+- **Gamer buckets** — launcher *caches only*, never game files or logins:
+  Steam (appcache, htmlcache, depotcache, shader cache), Epic Games
+  Launcher, Battle.net, Riot / League of Legends, GOG Galaxy, EA Desktop.
+- **Windows.old** is detected and flagged as irreversible, never selected
+  by default.
+- Safe by design: never touches browsers, passwords, the registry, active
+  drivers, or actual game files. Locked files are skipped, never forced.
+
+### Large files finder
+- Scan Downloads, Documents, Desktop, Videos, Pictures, Music, Program
+  Files, or a whole drive.
+- Configurable min-size (default 500 MB) and top-N (default 100).
+- **Read-only** — only "Show in Explorer" and "Copy path" actions. Deletion
+  is disabled by design so a mis-click can never hurt anything.
 
 ### Drivers
 - List all installed drivers with versions and dates
@@ -65,6 +99,16 @@ Everything runs on the machine itself. No cloud, no telemetry, no account.
 ### Dashboard
 - One-line OS / CPU / RAM / disk summary
 - Live uptime counter
+
+### Updates (for SysManager itself)
+- Auto-check on startup against the GitHub Releases API, plus a manual
+  "Check for updates" button in the About tab.
+- Discreet banner in the main window when a newer version is available.
+- Background download of the new build with a progress bar. If the
+  download is blocked, a "Manual download" button opens GitHub in the
+  browser.
+- One-click "Install" launches the new build and hands off cleanly.
+- Full release-note history pulled live from GitHub.
 
 ## Screenshots
 
@@ -82,7 +126,7 @@ runtime required.
 Prerequisites: Windows 10 or newer and the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 ```powershell
-git clone https://github.com/<YOUR_USER>/SysManager.git
+git clone https://github.com/laurentiu021/SysManager.git
 cd SysManager
 dotnet run --project SysManager/SysManager/SysManager.csproj
 ```
@@ -140,3 +184,5 @@ Windows Update / winget endpoints).
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+Crafted by [laurentiu021](https://github.com/laurentiu021).

@@ -1,4 +1,8 @@
-﻿using System.Windows;
+﻿// SysManager — Windows system monitoring toolkit
+// Author : laurentiu021 · https://github.com/laurentiu021/SysManager
+// License: MIT
+
+using System.Windows;
 using System.Windows.Threading;
 using SysManager.Services;
 

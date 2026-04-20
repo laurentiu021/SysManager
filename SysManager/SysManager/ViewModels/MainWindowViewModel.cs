@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using SysManager.Helpers;
 using SysManager.Services;
 
@@ -12,9 +13,11 @@ public partial class MainWindowViewModel : ObservableObject
     public WindowsUpdateViewModel WindowsUpdate { get; }
     public SystemHealthViewModel SystemHealth { get; }
     public CleanupViewModel Cleanup { get; }
+    public DeepCleanupViewModel DeepCleanup { get; }
     public NetworkViewModel Network { get; }
     public DriversViewModel Drivers { get; }
     public LogsViewModel Logs { get; }
+    public AboutViewModel About { get; }
 
     public ObservableCollection<NavItem> NavItems { get; } = new();
 
@@ -34,9 +37,11 @@ public partial class MainWindowViewModel : ObservableObject
         WindowsUpdate = new WindowsUpdateViewModel(new PowerShellRunner());
         SystemHealth = new SystemHealthViewModel(sysInfo);
         Cleanup = new CleanupViewModel(new PowerShellRunner());
+        DeepCleanup = new DeepCleanupViewModel();
         Network = new NetworkViewModel();
         Drivers = new DriversViewModel(new PowerShellRunner());
         Logs = new LogsViewModel();
+        About = new AboutViewModel();
 
         IsElevated = AdminHelper.IsElevated();
         ElevationBadge = IsElevated ? "Administrator" : "Standard user";
@@ -49,10 +54,19 @@ public partial class MainWindowViewModel : ObservableObject
         NavItems.Add(new NavItem { Id = "nav-windows-update", Label = "Windows Update", Glyph = "\uE895", Content = WindowsUpdate, ViewType = typeof(Views.WindowsUpdateView) });
         NavItems.Add(new NavItem { Id = "nav-system-health",  Label = "System health",  Glyph = "\uE9D9", Content = SystemHealth,  ViewType = typeof(Views.SystemHealthView) });
         NavItems.Add(new NavItem { Id = "nav-cleanup",        Label = "Cleanup",        Glyph = "\uE74D", Content = Cleanup,       ViewType = typeof(Views.CleanupView) });
+        NavItems.Add(new NavItem { Id = "nav-deep-cleanup",    Label = "Deep cleanup",   Glyph = "\uE81E", Content = DeepCleanup,   ViewType = typeof(Views.DeepCleanupView) });
         NavItems.Add(new NavItem { Id = "nav-network",        Label = "Network",        Glyph = "\uE839", Content = Network,       ViewType = typeof(Views.NetworkView) });
         NavItems.Add(new NavItem { Id = "nav-drivers",        Label = "Drivers",        Glyph = "\uE950", Content = Drivers,       ViewType = typeof(Views.DriversView) });
         NavItems.Add(new NavItem { Id = "nav-logs",           Label = "Logs",           Glyph = "\uE9F9", Content = Logs,          ViewType = typeof(Views.LogsView) });
+        NavItems.Add(new NavItem { Id = "nav-about",          Label = "About",          Glyph = "\uE946", Content = About,         ViewType = typeof(Views.AboutView) });
 
         SelectedNav = NavItems[0];
+    }
+
+    [RelayCommand]
+    private void OpenAboutTab()
+    {
+        var about = NavItems.FirstOrDefault(n => n.Id == "nav-about");
+        if (about != null) SelectedNav = about;
     }
 }

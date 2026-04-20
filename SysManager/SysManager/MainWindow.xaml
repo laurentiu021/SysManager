@@ -139,7 +139,8 @@
                                        VerticalAlignment="Center"/>
                         </StackPanel>
                     </Border>
-                    <TextBlock Text="v0.2 · 2026" Style="{StaticResource Caption}" Margin="0,8,0,0"/>
+                    <TextBlock Text="{Binding About.CurrentVersion, StringFormat=v{0}}" Style="{StaticResource Caption}" Margin="0,8,0,0"/>
+                    <TextBlock Text="by laurentiu021" Style="{StaticResource Caption}" Margin="0,2,0,0" Opacity="0.7"/>
                 </StackPanel>
             </Grid>
         </Border>
@@ -149,8 +150,38 @@
                 Background="{StaticResource Surface0}"
                 AutomationProperties.AutomationId="ContentHost"
                 AutomationProperties.Name="ContentHost">
-            <ContentControl x:Name="ContentHost"
-                            Content="{Binding SelectedNav.View}"/>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Update banner — only when a newer release is available. -->
+                <Border Grid.Row="0" Margin="24,16,24,0" Padding="14,10" CornerRadius="10"
+                        Background="#0F1A2E" BorderBrush="{StaticResource Accent}" BorderThickness="1"
+                        Visibility="{Binding About.UpdateAvailable, Converter={StaticResource FlexVis}}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <TextBlock Text="&#xE896;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                       FontSize="16" Foreground="{StaticResource Accent}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <TextBlock Text="Update available" FontWeight="SemiBold" Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
+                            <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding About.LatestVersionLabel}" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                            <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding About.LatestPublishedLabel}" Foreground="{StaticResource TextSecondary}" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="View details" Command="{Binding OpenAboutTabCommand}"
+                                Style="{StaticResource PrimaryButton}" Padding="14,6"/>
+                    </Grid>
+                </Border>
+
+                <ContentControl Grid.Row="1" x:Name="ContentHost"
+                                Content="{Binding SelectedNav.View}"/>
+            </Grid>
         </Border>
     </Grid>
 </Window>

@@ -1,0 +1,183 @@
+<UserControl x:Class="SysManager.Views.AboutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <LinearGradientBrush x:Key="PageBg" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#070A0F" Offset="0"/>
+            <GradientStop Color="#0B1220" Offset="0.5"/>
+            <GradientStop Color="#090D16" Offset="1"/>
+        </LinearGradientBrush>
+    </UserControl.Resources>
+
+    <Grid Background="{StaticResource PageBg}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="28,24,28,28">
+
+                <!-- Header -->
+                <StackPanel>
+                    <TextBlock Text="About SysManager" Style="{StaticResource Display}"/>
+                    <TextBlock Text="Version info, updates and release notes." Style="{StaticResource Subtle}" Margin="0,4,0,0"/>
+                    <TextBlock Text="Built by laurentiu021 · MIT licensed" Style="{StaticResource Subtle}" Margin="0,2,0,0" Opacity="0.7"/>
+                </StackPanel>
+
+                <!-- Version card -->
+                <Border Style="{StaticResource Card}" Margin="0,20,0,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="SysManager" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                                <Border Style="{StaticResource BadgeAccent}" Margin="12,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CurrentVersion, StringFormat=v{0}}" Foreground="White" FontWeight="SemiBold" FontSize="12"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Local Windows system monitoring toolkit." Style="{StaticResource Subtle}" Margin="0,4,0,0"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                <TextBlock Text="BUILD" Style="{StaticResource Caption}"/>
+                                <TextBlock Text="{Binding BuildDate}" Margin="8,0,24,0" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                                <TextBlock Text="LICENSE" Style="{StaticResource Caption}"/>
+                                <TextBlock Text="MIT" Margin="8,0,24,0" Foreground="{StaticResource TextSecondary}" FontSize="12"/>
+                                <TextBlock Text="SOURCE" Style="{StaticResource Caption}"/>
+                                <TextBlock Margin="8,0,0,0" FontSize="12">
+                                    <Hyperlink Command="{Binding OpenRepoCommand}" Foreground="{StaticResource Accent}">github.com/laurentiu021/SysManager</Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="Check for updates" Command="{Binding CheckForUpdatesCommand}"
+                                    Style="{StaticResource PrimaryButton}"
+                                    IsEnabled="{Binding IsCheckingForUpdates, Converter={StaticResource FlexVis}, ConverterParameter=Inverse}"/>
+                            <Button Content="View license" Command="{Binding OpenLicenseCommand}"
+                                    Style="{StaticResource GhostButton}" Margin="8,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Update available card -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0"
+                        BorderBrush="{StaticResource Accent}" BorderThickness="1"
+                        Visibility="{Binding UpdateAvailable, Converter={StaticResource FlexVis}}">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE896;" FontFamily="Segoe Fluent Icons,Segoe MDL2 Assets"
+                                               FontSize="18" Foreground="{StaticResource Accent}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="Update available" FontSize="16" FontWeight="SemiBold"
+                                               Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding LatestVersionLabel}" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding LatestPublishedLabel}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding UpdateStatus}" Style="{StaticResource Subtle}" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Content="Install" Command="{Binding InstallUpdateCommand}"
+                                        Style="{StaticResource PrimaryButton}" Padding="18,10" FontSize="14"
+                                        Visibility="{Binding DownloadedPath, Converter={StaticResource FlexVis}}"/>
+                                <Button Content="Manual download" Command="{Binding OpenManualDownloadCommand}"
+                                        Style="{StaticResource SecondaryButton}" Margin="8,0,0,0"
+                                        Visibility="{Binding AutoDownloadFailed, Converter={StaticResource FlexVis}}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Download progress -->
+                        <StackPanel Margin="0,14,0,0"
+                                    Visibility="{Binding IsDownloading, Converter={StaticResource FlexVis}}">
+                            <ProgressBar Height="6" Minimum="0" Maximum="100" Value="{Binding DownloadPercent}"/>
+                            <TextBlock Text="{Binding DownloadStatus}" Style="{StaticResource Subtle}" Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <!-- Download completed -->
+                        <StackPanel Margin="0,14,0,0" Orientation="Horizontal"
+                                    Visibility="{Binding DownloadedPath, Converter={StaticResource FlexVis}}">
+                            <Ellipse Width="10" Height="10" Fill="#22C55E" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="{Binding DownloadStatus}" Foreground="#22C55E" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                            <TextBlock VerticalAlignment="Center">
+                                <Hyperlink Command="{Binding OpenDownloadFolderCommand}" Foreground="{StaticResource Accent}">Show file</Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Up-to-date quiet card (or error with retry) -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0"
+                        Visibility="{Binding UpdateAvailable, Converter={StaticResource FlexVis}, ConverterParameter=Inverse}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Ellipse Grid.Column="0" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,10,0" Fill="#22C55E"/>
+                        <TextBlock Grid.Column="1" Text="{Binding UpdateStatus}" Foreground="{StaticResource TextSecondary}"
+                                   VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <Button Grid.Column="2" Content="Retry" Command="{Binding CheckForUpdatesCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="14,6" Margin="12,0,0,0"
+                                IsEnabled="{Binding IsCheckingForUpdates, Converter={StaticResource FlexVis}, ConverterParameter=Inverse}"/>
+                    </Grid>
+                </Border>
+
+                <!-- What's new — full history -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock Text="What's new" Style="{StaticResource SectionTitle}"/>
+                            <Button Content="Refresh" Command="{Binding LoadHistoryCommand}" Style="{StaticResource GhostButton}"
+                                    HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                        </DockPanel>
+                        <TextBlock Text="Release notes pulled live from GitHub. Each entry shows the patch version, date and the full changelog."
+                                   Style="{StaticResource Subtle}" Margin="0,4,0,10" TextWrapping="Wrap"/>
+
+                        <ItemsControl ItemsSource="{Binding ReleaseHistory}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource CardInner}" Margin="0,0,0,10">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Version}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimary}"/>
+                                                <Border Margin="10,0,0,0" VerticalAlignment="Center"
+                                                        Visibility="{Binding IsCurrent, Converter={StaticResource BoolToVis}}"
+                                                        Style="{StaticResource BadgeAccent}">
+                                                    <TextBlock Text="Current" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                                                </Border>
+                                                <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                                                <TextBlock Text="{Binding Title}" Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="  ·  " Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding PublishedAt}" Foreground="{StaticResource TextMuted}" FontSize="12" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Body}" Foreground="{StaticResource TextSecondary}"
+                                                       TextWrapping="Wrap" Margin="0,8,0,0" FontFamily="{StaticResource UiFont}"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Legal footer -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Legal" Style="{StaticResource SectionTitle}"/>
+                        <TextBlock TextWrapping="Wrap" Margin="0,6,0,0" Foreground="{StaticResource TextSecondary}" FontSize="12">
+                            SysManager is released under the MIT License. The software is provided "AS IS", without warranty of any kind.
+                            All operations are local to your machine — no telemetry, no accounts. Updates are fetched from the public
+                            GitHub Releases API and downloaded directly from GitHub.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

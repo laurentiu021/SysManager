@@ -64,3 +64,4 @@ _ReSharper*/
 !.vscode/launch.json
 !.vscode/tasks.json
 !.vscode/extensions.json
+.commitmsg

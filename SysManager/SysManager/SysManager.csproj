@@ -11,12 +11,17 @@
     <AssemblyName>SysManager</AssemblyName>
     <RootNamespace>SysManager</RootNamespace>
     <LangVersion>latest</LangVersion>
-    <Version>0.4.0</Version>
-    <FileVersion>0.4.0.0</FileVersion>
-    <AssemblyVersion>0.4.0.0</AssemblyVersion>
-    <Company>SysManager</Company>
+    <Version>0.5.0</Version>
+    <FileVersion>0.5.0.0</FileVersion>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
+    <Authors>laurentiu021</Authors>
+    <Company>laurentiu021</Company>
     <Product>SysManager</Product>
-    <Description>System toolkit — network, updates, health, logs</Description>
+    <Copyright>Copyright (c) 2026 laurentiu021</Copyright>
+    <Description>SysManager — Windows system monitoring toolkit by laurentiu021. Network, updates, health, logs, safe deep cleanup.</Description>
+    <PackageProjectUrl>https://github.com/laurentiu021/SysManager</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/laurentiu021/SysManager</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
