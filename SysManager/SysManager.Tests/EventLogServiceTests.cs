@@ -8,6 +8,7 @@ namespace SysManager.Tests;
 /// machine. Kept small + short to stay fast and deterministic.
 /// </summary>
 [Collection("Network")] // reuse collection to serialize Windows-level tests
+[Trait("Category", "LocalOnly")]
 public class EventLogServiceTests
 {
     [Fact]

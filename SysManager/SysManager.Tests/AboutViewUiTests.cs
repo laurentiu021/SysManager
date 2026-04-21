@@ -6,6 +6,7 @@ using SysManager.Views;
 namespace SysManager.Tests;
 
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class AboutViewUiTests
 {
     [Fact]

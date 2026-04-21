@@ -40,6 +40,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `[Trait("Category", "LocalOnly")]`. CI runs with
   `--filter "Category!=LocalOnly"` so the build stays green while the
   tests continue to run locally where the dispatcher is deterministic.
+- **More slow/real-system tests excluded from CI** — `EventLogServiceTests`,
+  `DiskHealthServiceTests`, `PowerShellRunnerTests`,
+  `PowerShellRunnerDebugTests`, `MemoryTestServiceTests`,
+  `SystemInfoServiceTests`, `AboutViewUiTests`, `DeepCleanupViewUiTests`
+  tagged `LocalOnly`; these hit real Windows APIs (Event Log, WMI,
+  PowerShell process, WPF pack URIs) that are unavailable or too slow on
+  the hosted runner.
+- **Bug fixes in test data** — `UpdateServiceTests.IsNewer_HandlesMajorJumps`
+  had `latest`/`current` columns swapped; corrected.
+- **Bug fix: `UpdateService.ParseVersion`** — `TrimStart('v','V')` stripped
+  all leading v characters, so `"vv1.2.3"` parsed successfully instead of
+  returning null. Now strips at most one leading v/V.
+- **Bug fix: `FixedDriveService.EnumerateAsync`** — passing a pre-cancelled
+  `CancellationToken` to `Task.Run` caused `TaskCanceledException` before
+  the synchronous `Enumerate()` delegate ran. Token is no longer forwarded.
 
 ## [0.5.1] - 2026-04-20
 

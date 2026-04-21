@@ -3,6 +3,7 @@ using SysManager.Services;
 namespace SysManager.Tests;
 
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class MemoryTestServiceTests
 {
     [Fact]

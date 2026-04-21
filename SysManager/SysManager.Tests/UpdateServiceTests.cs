@@ -157,8 +157,8 @@ public class UpdateServiceTests
     }
 
     [Theory]
-    [InlineData("0.0.0", "0.0.1", true)]
-    [InlineData("0.0.1", "0.0.0", false)]
+    [InlineData("0.0.1", "0.0.0", true)]
+    [InlineData("0.0.0", "0.0.1", false)]
     [InlineData("0.10.0", "0.9.0", true)]
     [InlineData("0.9.0", "0.10.0", false)]
     [InlineData("1.0.0", "0.99.99", true)]
