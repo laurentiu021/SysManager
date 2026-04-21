@@ -11,6 +11,7 @@ namespace SysManager.Tests;
 /// cases that a UI user could realistically hit on a 24/7 monitoring host.
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class QaAuditTests
 {
     private const string Unreachable = "192.0.2.1";

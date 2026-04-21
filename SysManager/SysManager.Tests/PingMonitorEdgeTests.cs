@@ -4,6 +4,7 @@ using SysManager.Services;
 namespace SysManager.Tests;
 
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class PingMonitorEdgeTests
 {
     private const string Unreachable = "192.0.2.1";

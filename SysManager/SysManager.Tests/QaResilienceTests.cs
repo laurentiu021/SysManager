@@ -10,6 +10,7 @@ namespace SysManager.Tests;
 /// memory pressure, unusual input, concurrent mutation.
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class QaResilienceTests
 {
     // ==================================================================

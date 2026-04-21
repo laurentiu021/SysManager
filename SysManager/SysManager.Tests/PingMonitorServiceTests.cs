@@ -9,6 +9,7 @@ namespace SysManager.Tests;
 /// complete fast (timeout) without requiring internet access.
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class PingMonitorServiceTests
 {
     private const string UnreachableHost = "192.0.2.1"; // RFC 5737 TEST-NET-1
