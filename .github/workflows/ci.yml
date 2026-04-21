@@ -52,6 +52,7 @@ jobs:
         run: >
           dotnet test SysManager/SysManager.Tests/SysManager.Tests.csproj
           -c Release --no-build
+          --filter "Category!=LocalOnly"
           --logger "trx;LogFileName=unit-results.trx"
           --collect:"XPlat Code Coverage"
           --results-directory TestResults

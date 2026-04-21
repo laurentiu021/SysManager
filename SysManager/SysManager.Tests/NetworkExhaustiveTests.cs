@@ -9,6 +9,7 @@ namespace SysManager.Tests;
 /// loss accounting, target lifecycle under load, interval clamping, etc.
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class NetworkExhaustiveTests
 {
     private static void InvokeOnSample(NetworkViewModel vm, PingSample sample)

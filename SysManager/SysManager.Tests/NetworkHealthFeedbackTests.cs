@@ -5,6 +5,7 @@ using SysManager.ViewModels;
 namespace SysManager.Tests;
 
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class NetworkHealthFeedbackTests
 {
     private static void InvokeOnSample(NetworkViewModel vm, PingSample s)

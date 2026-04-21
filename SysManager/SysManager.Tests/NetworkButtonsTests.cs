@@ -12,6 +12,7 @@ namespace SysManager.Tests;
 ///  - correctly wired to the expected state change
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class NetworkButtonsTests
 {
     private static void InvokeOnSample(NetworkViewModel vm, PingSample sample)

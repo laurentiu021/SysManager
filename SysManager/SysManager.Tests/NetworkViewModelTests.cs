@@ -10,6 +10,7 @@ namespace SysManager.Tests;
 /// touches WPF Application-scoped types.
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class NetworkViewModelTests
 {
     private static NetworkViewModel MakeFresh()

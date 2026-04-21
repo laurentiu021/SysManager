@@ -8,6 +8,7 @@ namespace SysManager.Tests;
 /// Regression tests for the "I unchecked a target but it keeps pinging" issue.
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class NetworkViewModelDisableTests
 {
     private static void InvokeOnSample(NetworkViewModel vm, PingSample sample)

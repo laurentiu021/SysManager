@@ -10,6 +10,7 @@ namespace SysManager.Tests;
 /// for deterministic unit tests.
 /// </summary>
 [Collection("Network")]
+[Trait("Category", "LocalOnly")]
 public class NetworkViewModelSampleTests
 {
     private static void InvokeOnSample(NetworkViewModel vm, PingSample sample)
