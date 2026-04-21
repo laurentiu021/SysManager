@@ -51,8 +51,10 @@ public class LargeFileScannerTests
         var s = new LargeFileScanner();
         using var cts = new CancellationTokenSource();
         cts.Cancel();
-        var r = await s.ScanAsync(Path.GetTempPath(), 1, 10, ct: cts.Token);
-        Assert.NotNull(r);
+        // Task.Run(..., cancelledToken) throws TaskCanceledException — the
+        // contract is "no work happens", not "returns an empty list".
+        await Assert.ThrowsAsync<TaskCanceledException>(
+            () => s.ScanAsync(Path.GetTempPath(), 1, 10, ct: cts.Token));
     }
 
     [Fact]
@@ -168,8 +170,8 @@ public class LargeFileScannerTests
         for (var i = 0; i < 20; i++) File.WriteAllText(Path.Combine(root, $"f{i}.txt"), "x");
         try
         {
-            var reports = new List<string>();
-            var prog = new Progress<string>(reports.Add);
+            var reports = new List<LargeFileScanner.LargeFileProgress>();
+            var prog = new Progress<LargeFileScanner.LargeFileProgress>(reports.Add);
             var s = new LargeFileScanner();
             await s.ScanAsync(root, 1, 10, progress: prog);
             // Progress may or may not fire depending on file count threshold,

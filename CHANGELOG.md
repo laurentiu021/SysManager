@@ -4,6 +4,35 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Repository hygiene** — `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
+  `SECURITY.md`, `SUPPORT.md`, `.editorconfig`, and a full
+  `.github/` folder (issue + PR templates, CI + release workflows,
+  Dependabot config, CODEOWNERS, FUNDING placeholder).
+- **CI** — GitHub Actions build + unit-test pipeline on every push/PR,
+  plus a separate UI-automation job. Cache NuGet packages between runs.
+- **Release workflow** — tag-driven build of a signed-free single-file
+  exe, SHA256 checksum file, automatic extraction of release notes from
+  `CHANGELOG.md`, uploaded together as a GitHub Release.
+- **Copy environment info** button on the About tab — copies SysManager
+  version, Windows version, architecture, .NET runtime and elevation
+  state to the clipboard, ready to paste into a bug report.
+- **Screenshots** folder (`docs/screenshots/`) with capture and privacy
+  conventions documented.
+- **Manual UI smoke script** (`docs/manual-smoke.ps1`) referenced from
+  `TESTING.md` — walks every nav tab via the Windows UI Automation tree.
+- **README badges** for CI status, latest release, downloads and open
+  issues. New sections for reporting bugs, security and contributing.
+
+### Fixed
+- **Broken unit tests on main** — three tests in
+  `DeepCleanupServiceTests` and `LargeFileScannerTests` no longer
+  matched the service signatures introduced in 0.5.1 (progress reporting).
+  They now compile and pass, and the cancellation tests correctly
+  assert `TaskCanceledException` from `Task.Run(..., cancelledToken)`.
+
 ## [0.5.1] - 2026-04-20
 
 ### Added
