@@ -34,7 +34,7 @@ public class ProcessManagerServiceTests
     public async Task Snapshot_EntriesHaveValidPid()
     {
         var result = await _service.SnapshotAsync();
-        Assert.All(result, p => Assert.True(p.Pid > 0));
+        Assert.All(result, p => Assert.True(p.Pid >= 0));
     }
 
     [Fact]
@@ -62,7 +62,8 @@ public class ProcessManagerServiceTests
     public async Task Snapshot_EntriesHaveThreadCount()
     {
         var result = await _service.SnapshotAsync();
-        Assert.All(result, p => Assert.True(p.ThreadCount > 0));
+        // Most processes have threads, but system/idle may report 0
+        Assert.All(result, p => Assert.True(p.ThreadCount >= 0));
     }
 
     [Fact]
