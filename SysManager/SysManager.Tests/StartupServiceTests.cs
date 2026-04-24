@@ -76,12 +76,13 @@ public class StartupServiceTests
         var svc = new StartupService();
         var result = await svc.ScanAsync();
         // Entries from different sources (registry vs folder vs scheduler)
-        // may legitimately share a name. We only check for duplicates
-        // within the same source type.
+        // may legitimately share a name. Within the same source, entries
+        // from Run and RunOnce may also share a name (e.g. "desktop").
+        // We check for exact (name + source + location) triples.
         var dupes = result
-            .GroupBy(e => (e.Name.ToLowerInvariant(), e.Source))
+            .GroupBy(e => (e.Name.ToLowerInvariant(), e.Source, e.Location.ToLowerInvariant()))
             .Where(g => g.Count() > 1)
-            .Select(g => $"{g.Key.Item1} ({g.Key.Source})")
+            .Select(g => $"{g.Key.Item1} ({g.Key.Source}, {g.Key.Item3})")
             .ToList();
         Assert.Empty(dupes);
     }
