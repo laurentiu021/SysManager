@@ -71,12 +71,18 @@ public class StartupServiceTests
     }
 
     [Fact]
-    public async Task ScanAsync_NoDuplicateNames()
+    public async Task ScanAsync_NoDuplicateNamesWithinSameSource()
     {
         var svc = new StartupService();
         var result = await svc.ScanAsync();
-        var names = result.Select(e => e.Name.ToLowerInvariant()).ToList();
-        var dupes = names.GroupBy(n => n).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+        // Entries from different sources (registry vs folder vs scheduler)
+        // may legitimately share a name. We only check for duplicates
+        // within the same source type.
+        var dupes = result
+            .GroupBy(e => (e.Name.ToLowerInvariant(), e.Source))
+            .Where(g => g.Count() > 1)
+            .Select(g => $"{g.Key.Item1} ({g.Key.Source})")
+            .ToList();
         Assert.Empty(dupes);
     }
 
