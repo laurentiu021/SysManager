@@ -532,7 +532,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 - **CI** — Codecov upload upgraded to v5; explicit file glob removed.
 - **Discussions announcement** posted automatically on every release.
-- `.kiro/` added to `.gitignore`.
+- `.editor/` added to `.gitignore`.
 
 ## [0.5.2] - 2026-04-21
 
