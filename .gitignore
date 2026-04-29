@@ -69,5 +69,5 @@ _ReSharper*/
 # IDE / editor local config
 .editor/
 
-# Kiro IDE local config
+# IDE local config
 .kiro/
